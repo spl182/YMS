@@ -1,0 +1,32 @@
+/*Get_All_Data_DC_Admin_No_Weight*/
+/*Retrieves all the data displayed on the DC Admin Mashup*/
+SELECT 
+	T.[LOADID] AS 'load_id',
+	T.[destination_country] AS 'destination_country',
+	T.[DELIVERY]	AS 'delivery_id',
+	CONVERT(VARCHAR(16),T.[booking_time],20) AS 'booking_time',
+	CONVERT(VARCHAR(5),(SELECT MAX(TT_Zaznam.DatumACas) FROM TT_Zaznam WHERE (Poradi=1 AND TT_Zaznam.IdVozidla = T.LOADID)),108) AS 'DatumACas_1',/*1*/
+	CONVERT(VARCHAR(5),(SELECT MAX(TT_Zaznam.DatumACas) FROM TT_Zaznam WHERE (Poradi=2 AND TT_Zaznam.IdVozidla = T.LOADID)),108) AS 'DatumACas_2',/*2*/
+	CONVERT(VARCHAR(5),(SELECT MAX(TT_Zaznam.DatumACas) FROM TT_Zaznam WHERE (Poradi=3 AND TT_Zaznam.IdVozidla = T.LOADID)),108) AS 'DatumACas_3',/*3*/
+	CONVERT(VARCHAR(5),(SELECT MAX(TT_Zaznam.DatumACas) FROM TT_Zaznam WHERE (Poradi=4 AND TT_Zaznam.IdVozidla = T.LOADID)),108) AS 'DatumACas_4',/*4*/
+	CONVERT(VARCHAR(5),(SELECT MAX(TT_Zaznam.DatumACas) FROM TT_Zaznam WHERE (Poradi=31 AND TT_Zaznam.IdVozidla = T.LOADID)),108) AS 'DatumACas_31',/*31*/
+	T.picked_pallets as 'picked_pallets',
+	T.assigned_dock AS 'dock_num',
+	T.loading_pattern AS 'loading_pattern',
+	T.calloff AS 'call_of',
+	CONVERT (VARCHAR(16),T.start_driver_break,20)  AS 'start_break',
+	CONVERT (VARCHAR(16),T.end_driver_break,20) AS 'end_break',
+	(DATEDIFF(mi,T.[booking_time], GETDATE()))-180 AS 'time_of_loading',
+	B.[Poradi]
+FROM TB_YMS_TMS AS T
+INNER JOIN TT_Zaznam AS B
+	ON T.[LOADID] = B.[IdVozidla]
+WHERE 
+	B.Poradi = 1
+	AND
+	(SELECT MAX(TT_Zaznam.DatumACas) FROM TT_Zaznam WHERE (Poradi=1 AND TT_Zaznam.IdVozidla = T.LOADID)) IS NOT NULL
+	AND 
+	(SELECT MAX(TT_Zaznam.DatumACas) FROM TT_Zaznam WHERE (Poradi=35 AND TT_Zaznam.IdVozidla = T.LOADID)) IS NULL
+	AND
+	(appt_location_id = 'CZ02')
+ORDER BY T.booking_time ASC
